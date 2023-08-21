@@ -1,7 +1,9 @@
 let db = require("../utils/db");
 let argon2 = require("argon2"); // this is the pwd hash tool
 let jwt = require("jsonwebtoken");
-require('dotenv').config(); //come back to this
+require('dotenv').config();
+
+// AUTHENTICATION: ARE YOU WHO YOU SAY YOU ARE WHEN YOU LOG IN?
 /**
  * get the username, password, full_name from the body of the request
  * hash the password
@@ -106,11 +108,14 @@ let login = (req, res) => {
 
                     // now we need to sign the token
                     let signedToken = jwt.sign(token, process.env.JWT_SECRET);
-                    // res.json(signedToken) // show this just for testing
+                    // show this just for testing
+                    // in real life, you'll send this token to the front end, and the front end will sore it in session storage, local storage, or a cookie
+                    // res.json(signedToken) 
+
 
                     // cannot have line 109 and 113 ran at the same time
 
-                    res.sendStatus(200) // this is what you will send in a real life situation (production)
+                   res.sendStatus(200) // this is what you will send in a real life situation (production)
 
                 } else {
                     res.sendStatus(400) //
