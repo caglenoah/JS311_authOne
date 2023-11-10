@@ -1,11 +1,11 @@
 let express = require("express");
 require('dotenv').config();
-
+const cors = require("cors")
 
 let app = express();
 
 const port = process.env.PORT || 4002;
-
+app.use(cors())
 app.use(express.json());
 
 let messageRoutes = require("./routes/messageRoutes");
