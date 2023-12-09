@@ -1,24 +1,11 @@
 let db = require("../utils/db");
-let argon2 = require("argon2"); // this is the pwd hash tool
+let argon2 = require("argon2");
 let jwt = require("jsonwebtoken");
 require("dotenv").config();
-
-// AUTHENTICATION: ARE YOU WHO YOU SAY YOU ARE WHEN YOU LOG IN?
-/**
- * get the username, password, full_name from the body of the request
- * hash the password
- * insert the new record in the data base
- * since the hash MUST finish first, we have to do an async/await to these steps
- *
- * request should look like this
- * {"userame": "ncagle", "password": "bobisGreat", "full_name"}
- */
 
 let register = async (request, res) => {
   let username = request.body.username;
   let password = request.body.password;
-
-  // const { username, password, full_name } = req.body; shortcut!
 
   let passwordHash;
 
@@ -34,7 +21,6 @@ let register = async (request, res) => {
 
   try {
     let results = await db.queryPromise(sql, params); //calling function from db.js
-    // since I don't need to see any results, I don't need to use querySync
     res.sendStatus(200);
   } catch (err) {
     console.log(err);
@@ -43,21 +29,10 @@ let register = async (request, res) => {
     } else {
       res.sendStatus(500);
     }
-    return; // stops execution of any ore code in this function
+    return;
   }
 };
 
-/**
- *  we have a registered, user, and now they want to login
- * if they are good, here's your token, if not try again
- * take in the username and password from the login form (req body)
- * find the user in the database and
- * we hash that password and compare it to the hash in the database
- * if the hashes match, it's a good password
- * so create a token for this user
- * sign the token - which means we're going to add salt (secret)
- * make the secret in my .env
- */
 let login = (req, res) => {
   let username = req.body.username;
   let password = req.body.password;
@@ -80,7 +55,6 @@ let login = (req, res) => {
           .status(400)
           .send("That user name doesn't exist. Please sign up for an account");
       } else {
-        // we have one good row
         //it comes back as an array with an object, so you have to get the row values by it's index
 
         let passwordHash = rows[0].pswrd;
@@ -96,27 +70,21 @@ let login = (req, res) => {
         }
 
         if (goodPass) {
-          //make an unsigned token
           let token = {
-            // usuallly do as little as possible with this
             user_name: username,
             userId: userId,
           };
 
-          // unsigned token, so I'm just testing to see if this works so far
-
-          // now we need to sign the token
+          // now i need to sign the token
           let signedToken = jwt.sign(token, process.env.JWT_SECRET);
           // show this just for testing
-          // in real life, you'll send this token to the front end, and the front end will sore it in session storage, local storage, or a cookie
-          // res.json(signedToken)
 
           // cannot have line 109 and 113 ran at the same time
 
           res.status(200); // this is what you will send in a real life situation (production)
           res.send(signedToken);
         } else {
-          res.sendStatus(400); //
+          res.sendStatus(400);
         }
       }
     }
